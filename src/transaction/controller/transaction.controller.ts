@@ -2,8 +2,8 @@ import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import TransactionService from '../service/transaction.service';
 import { ApiBody, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { TransactionDto } from '../dto/transaction.dto';
-import { TransactionAttrsDto } from '../dto/transaction-attrs.dto';
 import JwtAuthenticationGuard from '../../authentication/guard/jwt-authentication.guard';
+import { TransactionCreateDto } from '../dto/transaction-create.dto';
 
 @ApiTags('Transaction API')
 @Controller('transactions')
@@ -36,9 +36,9 @@ export default class TransactionController {
     summary: 'Add new transaction',
     description: 'Add new transaction',
   })
-  @ApiBody({ type: TransactionAttrsDto })
+  @ApiBody({ type: TransactionCreateDto })
   @ApiOkResponse({ type: TransactionDto })
-  createTransaction(@Body() transaction: TransactionAttrsDto) {
+  createTransaction(@Body() transaction: TransactionCreateDto) {
     return this.transactionService.createTransaction(transaction);
   }
 }

@@ -8,11 +8,12 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import AccountService from '../service/account.service';
-import { AccountAttrsDto } from '../dto/account-attrs.dto';
 import { ApiBody, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AccountDto } from '../dto/account.dto';
 import { AccountUpdateAttrsDto } from '../dto/account-update-attrs.dto';
 import JwtAuthenticationGuard from '../../authentication/guard/jwt-authentication.guard';
+import { AccountCreateDto } from '../dto/account-create.dto';
+import {AccountBalanceDto} from "../dto/account-balance.dto";
 
 @ApiTags('Account API')
 @Controller('accounts')
@@ -65,9 +66,9 @@ export default class AccountController {
     summary: 'Add new account',
     description: 'Add new account',
   })
-  @ApiBody({ type: AccountAttrsDto })
+  @ApiBody({ type: AccountCreateDto })
   @ApiOkResponse({ type: AccountDto })
-  async createAccount(@Body() account: AccountAttrsDto) {
+  async createAccount(@Body() account: AccountCreateDto) {
     return this.accountService.createAccount(account);
   }
 
@@ -90,7 +91,7 @@ export default class AccountController {
     description: 'Get account balance',
   })
   @Get(':accountId/balance')
-  @ApiOkResponse({ type: Number })
+  @ApiOkResponse({ type: AccountBalanceDto })
   getAccountBalance(@Param('accountId') id: string) {
     return this.accountService.getAccountBalance(id);
   }

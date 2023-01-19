@@ -19,13 +19,8 @@ export class AccountRepository {
   }
 
   async createAccount(newAccount): Promise<Account> {
-    // return this.baseRepository.create(newAccount);
     return await this.baseRepository.save(newAccount);
   }
-
-  // async saveAccount(newAccount): Promise<Account> {
-  //   return await this.baseRepository.save(newAccount);
-  // }
 
   async updateAccount(id, account): Promise<UpdateResult> {
     return await this.baseRepository.update(id, account);
