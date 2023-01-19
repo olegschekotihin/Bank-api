@@ -29,11 +29,11 @@ export default class AccountService {
   }
 
   async blockAccountById(id: string): Promise<AccountInterface> {
-    return this.updateAccountStatus(id, { active: false });
+    return await this.updateAccountStatus(id, { active: false });
   }
 
   async activateAccountById(id: string): Promise<AccountInterface> {
-    return this.updateAccountStatus(id, { active: true });
+    return await this.updateAccountStatus(id, { active: true });
   }
 
   async createAccount(
@@ -64,10 +64,30 @@ export default class AccountService {
     return await this.updateAccount(id, updatedAccount);
   }
 
-  async getAccountBalance(id: string): Promise<number> {
+  async getAccountBalance(id: string): Promise<{ balance: number }> {
     const account = await this.getAccountById(id);
+    const today = dayjs().format('YYYY-MM-DD');
 
-    return account?.balance;
+    if (
+      account.lastTransactionDate === today &&
+      account.transactionCount > account.dailyWithdrawalLimit
+    ) {
+      throw new HttpException(
+        'You have exceeded the number of transactions for today',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const isNewTransitionDay = account.lastTransactionDate === today;
+    const transactionCount = isNewTransitionDay ? account.transactionCount : 0;
+
+    await this.updateAccount(id, {
+      ...account,
+      transactionCount: transactionCount + 1,
+      lastTransactionDate: today,
+    });
+
+    return { balance: account?.balance };
   }
 
   async updateAccount(
@@ -90,11 +110,12 @@ export default class AccountService {
     active: { active: boolean },
   ): Promise<AccountInterface> {
     const account = await this.getAccountById(id);
+
     await this.accountRepository.updateAccount(id, {
       ...account,
       ...active,
     });
 
-    return account;
+    return await this.getAccountById(id);
   }
 }

@@ -3,7 +3,7 @@ import AccountService from '../../account/service/account.service';
 import { TransactionInterface } from '../interface/transaction.interface';
 import * as dayjs from 'dayjs';
 import { TransactionRepository } from '../repository/transaction.repository';
-import { TransactionAttrsInterface } from '../interface/transaction-attrs.interface';
+import { TransactionCreateInterface } from '../interface/transaction-create.interface';
 
 @Injectable()
 export default class TransactionService {
@@ -28,11 +28,12 @@ export default class TransactionService {
   }
 
   async createTransaction(
-    transaction: TransactionAttrsInterface,
+    transaction: TransactionCreateInterface,
   ): Promise<TransactionInterface> {
     const account = await this.accountService.getAccountById(
       transaction.accountId,
     );
+    const today = dayjs().format('YYYY-MM-DD');
 
     if (!account.active) {
       throw new HttpException(
@@ -41,31 +42,14 @@ export default class TransactionService {
       );
     }
 
-    if (
-      account.lastTransactionDate === transaction.transactionDate &&
-      account.transactionCount >
-        parseInt(process.env.TRANSACTION_ATTEMPTS_COUNT, 10)
-    ) {
-      throw new HttpException(
-        'You have exceeded the number of transactions for today',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
+    const extendedTransaction = { ...transaction, transactionDate: today };
 
-    const today = dayjs().format('YYYY-MM-DD');
-
-    const isNewTransitionDay =
-      account.lastTransactionDate === transaction.transactionDate;
-    const transactionCount = isNewTransitionDay ? account.transactionCount : 0;
-
-    // await this.transactionRepository.save(transaction);
-
-    const newTransaction = this.transactionRepository.create(transaction);
+    const newTransaction =
+      this.transactionRepository.create(extendedTransaction);
 
     await this.accountService.updateAccount(transaction.accountId, {
       ...account,
       balance: account.balance + transaction.value,
-      transactionCount: transactionCount + 1,
       lastTransactionDate: today,
     });
 

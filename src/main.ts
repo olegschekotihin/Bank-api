@@ -9,7 +9,7 @@ async function bootstrap() {
   app.use(cookieParser());
   initSwagger(app);
 
-  app.enableCors({ origin: '*' });
+  app.enableCors({ origin: process.env.ACCEPTED_DOMAIN });
 
   await app.listen(3000);
 }

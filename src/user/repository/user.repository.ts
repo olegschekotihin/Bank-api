@@ -12,10 +12,6 @@ export class UserRepository {
     private baseRepository: Repository<User>,
   ) {}
 
-  async findAll(): Promise<User[]> {
-    return await this.baseRepository.find();
-  }
-
   async findOne(attrs): Promise<User> {
     return await this.baseRepository.findOneBy({ ...attrs });
   }
